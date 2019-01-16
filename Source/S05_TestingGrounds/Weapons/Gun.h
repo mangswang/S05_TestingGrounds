@@ -49,4 +49,5 @@ public:
 
 	/** Fires a projectile. */
 	void OnFire();
+	AActor* AttachedActor;
 };
