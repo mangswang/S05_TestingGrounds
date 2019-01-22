@@ -45,18 +45,18 @@ void AGun::OnFire()
 		UWorld* const World = GetWorld();
 		if (World != NULL)
 		{
-				const FRotator SpawnRotation = FP_MuzzleLocation->GetComponentRotation();
+			const FRotator SpawnRotation = FP_MuzzleLocation->GetComponentRotation();
 
-				const FVector SpawnLocation = FP_MuzzleLocation->GetComponentLocation();
+			const FVector SpawnLocation = FP_MuzzleLocation->GetComponentLocation();
 
-				//Set Spawn Collision Handling Override
-				FActorSpawnParameters ActorSpawnParams;
-				ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+			//Set Spawn Collision Handling Override
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
-				// spawn the projectile at the muzzle
-				World->SpawnActor<ABallProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			// spawn the projectile at the muzzle
+			World->SpawnActor<ABallProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 		}
-	}	
+	}
 	// try and play the sound if specified
 	if (FireSound != NULL)
 	{
@@ -64,12 +64,12 @@ void AGun::OnFire()
 	}
 
 	// try and play a firing animation if specified
-	if (FireAnimation != NULL)
+	if (FireAnimationFP && AnimInstanceFP != NULL)
 	{
-
-		if (AnimInstance != NULL)
-		{
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
-		}
+		AnimInstanceFP->Montage_Play(FireAnimationFP, 1.f);
+	}
+	if (FireAnimationTP != NULL && AnimInstanceTP != NULL)
+	{
+		AnimInstanceTP->Montage_Play(FireAnimationTP, 1.f);
 	}
 }
