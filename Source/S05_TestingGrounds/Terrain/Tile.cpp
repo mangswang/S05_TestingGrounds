@@ -2,37 +2,72 @@
 
 #include "Tile.h"
 #include "Engine/World.h"
+#include "NavigationSystem.h"
 #include "DrawDebugHelpers.h"
+#include "ActorPool.h"
 
 // Sets default values
 ATile::ATile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	MinExtent = FVector(0, -2000, 0);
+	MaxExtent = FVector(4000, 2000, 0);
+	NavigationBoundsOffset = FVector(2000, 0, 0);
 }
+
+void ATile::SetPool(UActorPool * InPool)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Setting Pool %s"), *(InPool->GetName()))
+	Pool = InPool;
+
+	PositionNavMeshBoundsVolume();
+}
+
+void ATile::PositionNavMeshBoundsVolume()
+{
+	NavMeshBoundsVolume = Pool->CheckOutActor();
+	if (NavMeshBoundsVolume == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[%s] Not enought actors in pool."), *GetName());
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("[%s] Checked out: {%s}"), *GetName(), *NavMeshBoundsVolume->GetName());
+	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + NavigationBoundsOffset);
+	UNavigationSystemV1::GetNavigationSystem(GetWorld())->Build();
+}
+
 
 void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
 {
+	TArray<FSpawnPosition> SpawnPositions = RandomSpawnPositions(MinSpawn, MaxSpawn, Radius, MinScale, MaxScale);
+		for (FSpawnPosition SpawnPosition : SpawnPositions)
+		{
+			PlaceActor(ToSpawn, SpawnPosition);
+		}
+}
+
+TArray<FSpawnPosition> ATile::RandomSpawnPositions(int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
+{
+	TArray<FSpawnPosition> SpawnPositions;
 	int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (size_t i = 0; i < NumberToSpawn; i++)
 	{
-		FVector SpawnPoint;
-		float RandomScale = FMath::FRandRange(MinScale, MaxScale);
-		bool Found = FindEmptyLocation(SpawnPoint, Radius * RandomScale);
+		FSpawnPosition SpawnPosition;
+		SpawnPosition.Scale = FMath::FRandRange(MinScale, MaxScale);
+		bool Found = FindEmptyLocation(SpawnPosition.Location, Radius * SpawnPosition.Scale);
 		if (Found)
 		{
-			float RandomRotation = FMath::RandRange(-180.f, 180.f);
-			PlaceActor(ToSpawn, SpawnPoint, RandomRotation, RandomScale);
+			SpawnPosition.Rotation = FMath::RandRange(-180.f, 180.f);
+			SpawnPositions.Add(SpawnPosition);
 		}
 	}
+	return SpawnPositions;
 }
 
 bool ATile::FindEmptyLocation(FVector& OutLocation, float Radius)
 {
-	FVector Min(0, -2000, 0);
-	FVector Max(4000, 2000, 0);
-	FBox Bounds(Min, Max);
+	FBox Bounds(MinExtent, MaxExtent);
 	const int MAX_ATTEMPTS = 50;
 	for (size_t i = 0; i < MAX_ATTEMPTS; i++)
 	{
@@ -46,13 +81,13 @@ bool ATile::FindEmptyLocation(FVector& OutLocation, float Radius)
 	return false;
 }
 
-void  ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint, float Rotation, float Scale)
+void  ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition)
 {
 	AActor* Spawned = GetWorld()->SpawnActor(ToSpawn);
-	Spawned->SetActorRelativeLocation(SpawnPoint);
+	Spawned->SetActorRelativeLocation(SpawnPosition.Location);
 	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
-	Spawned->SetActorRotation(FRotator(0, Rotation, 0));
-	Spawned->SetActorScale3D(FVector(Scale));
+	Spawned->SetActorRotation(FRotator(0, SpawnPosition.Rotation, 0));
+	Spawned->SetActorScale3D(FVector(SpawnPosition.Scale));
 }
 
 bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
@@ -70,7 +105,7 @@ bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 }
 
 
@@ -79,6 +114,13 @@ void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	//UE_LOG(LogTemp, Warning, TEXT("[%s] EndPlay."), *GetName());
+	Pool->ReturnActor(NavMeshBoundsVolume);
 }
 
 

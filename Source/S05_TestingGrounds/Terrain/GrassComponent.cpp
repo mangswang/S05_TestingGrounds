@@ -32,6 +32,7 @@ void UGrassComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void UGrassComponent::SpawnGrass()
 {
+	int SpawnCount = FMath::RandRange(SpawnCountMin, SpawnCountMax);
 	for (size_t i = 0; i < SpawnCount; i++)
 	{
 		FVector Location = FMath::RandPointInBox(SpawningExtents);

@@ -29,6 +29,7 @@ AMannequin::AMannequin()
 	FPMesh->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
 }
 
+
 // Called when the game starts or when spawned
 void AMannequin::BeginPlay()
 {
@@ -87,3 +88,14 @@ void AMannequin::PullTrigger()
 	}
 }
 
+void AMannequin::GetActorEyesViewPoint(FVector & Location, FRotator & Rotation) const
+{
+	GetPerceptionLocRot(Location, Rotation);
+}
+
+void AMannequin::GetPerceptionLocRot_Implementation(FVector & OutLocation, FRotator & OutRotation) const
+{
+	OutLocation = GetActorLocation() + FVector(0, 0, 50);
+	OutRotation = GetActorRotation();
+
+}

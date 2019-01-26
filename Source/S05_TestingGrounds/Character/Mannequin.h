@@ -15,13 +15,16 @@ class S05_TESTINGGROUNDS_API AMannequin : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	UPROPERTY(VisibleAnywhere, Category = Mesh)
 	class USkeletalMeshComponent* FPMesh;
 
 public:
 	// Sets default values for this character's properties
 	AMannequin();
 
+	UFUNCTION(BlueprintNativeEvent, Category = "AIVariables | Character")
+	void GetPerceptionLocRot(FVector &OutLocation, FRotator &OutRotation) const;
+	void GetPerceptionLocRot_Implementation(FVector &OutLocation, FRotator &OutRotation) const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,6 +43,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void PullTrigger();
+
+	virtual void GetActorEyesViewPoint(FVector &Location, FRotator &Rotation) const override;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

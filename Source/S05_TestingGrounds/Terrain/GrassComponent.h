@@ -19,7 +19,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Spawning)
 	FBox SpawningExtents;
 	UPROPERTY(EditDefaultsOnly, Category = Spawning)
-	int SpawnCount;
+	int SpawnCountMin;
+	UPROPERTY(EditDefaultsOnly, Category = Spawning)
+	int SpawnCountMax;
 
 protected:
 	// Called when the game starts
