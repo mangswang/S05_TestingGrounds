@@ -6,6 +6,7 @@
 #include "Weapons/Gun.h"
 #include "Classes/Components/SkeletalMeshComponent.h"
 #include "Components/InputComponent.h"
+#include "Perception/AISense_Hearing.h"
 
 // Sets default values
 AMannequin::AMannequin()
@@ -85,6 +86,7 @@ void AMannequin::PullTrigger()
 	if (Gun != NULL)
 	{
 		Gun->OnFire();
+		UAISense_Hearing::ReportNoiseEvent(this, GetActorLocation(), 1.0f, this, 2000.0f);
 	}
 }
 

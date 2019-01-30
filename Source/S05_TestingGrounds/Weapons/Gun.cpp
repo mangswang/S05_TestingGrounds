@@ -4,6 +4,7 @@
 #include "Animation/AnimInstance.h"
 #include "BallProjectile.h"
 #include "Kismet/GameplayStatics.h"
+#include "Perception/AISense_Hearing.h"
 
 // Sets default values
 AGun::AGun()
@@ -56,6 +57,7 @@ void AGun::OnFire()
 
 			// spawn the projectile at the muzzle
 			World->SpawnActor<ABallProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			//UAISense_Hearing::ReportNoiseEvent(this, GetActorLocation(), 1.0f, GetParentActor());
 		}
 	}
 	// try and play the sound if specified

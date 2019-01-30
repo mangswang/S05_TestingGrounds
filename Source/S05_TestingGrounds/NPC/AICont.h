@@ -24,4 +24,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
 	class UAISenseConfig_Sight* SightConfig;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Perception")
+	class UAISenseConfig_Hearing* HearingConfig;
+
 };
